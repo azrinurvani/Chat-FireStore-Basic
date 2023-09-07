@@ -1,0 +1,76 @@
+{
+  "project_info": {
+    "project_number": "211407815651",
+    "project_id": "firestore-example-f764e",
+    "storage_bucket": "firestore-example-f764e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:211407815651:android:eee44771beb82074f896d6",
+        "android_client_info": {
+          "package_name": "com.azrinurvani.mobile.chatfirestorebasic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "211407815651-r4naeido5fbaudq5mvp9qehoet8oddfs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLV6lf3WWhCxFvf8nvPc3fLrHYbdSeJ7o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "211407815651-r4naeido5fbaudq5mvp9qehoet8oddfs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:211407815651:android:f5823258fb848017f896d6",
+        "android_client_info": {
+          "package_name": "com.mobile.azri.firestoreexample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "211407815651-t7f3vienhubmm5jospdpl19j6kajp657.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mobile.azri.firestoreexample",
+            "certificate_hash": "0dd62b173b699fbb1089a761e4cac4a5e417db72"
+          }
+        },
+        {
+          "client_id": "211407815651-r4naeido5fbaudq5mvp9qehoet8oddfs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLV6lf3WWhCxFvf8nvPc3fLrHYbdSeJ7o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "211407815651-r4naeido5fbaudq5mvp9qehoet8oddfs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
