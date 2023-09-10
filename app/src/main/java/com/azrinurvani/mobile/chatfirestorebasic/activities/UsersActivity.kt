@@ -1,6 +1,7 @@
 package com.azrinurvani.mobile.chatfirestorebasic.activities
 
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -9,19 +10,21 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.azrinurvani.mobile.chatfirestorebasic.adapters.UsersAdapter
 
 import com.azrinurvani.mobile.chatfirestorebasic.databinding.ActivityUsersBinding
+import com.azrinurvani.mobile.chatfirestorebasic.listeners.UserListener
 import com.azrinurvani.mobile.chatfirestorebasic.models.User
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_COLLECTION_USERS
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_EMAIL
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_FCM_TOKEN
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_IMAGE
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_NAME
+import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_USER
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_USER_ID
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.PreferenceManager
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.math.log
 
 
-class UsersActivity : AppCompatActivity() {
+class UsersActivity : AppCompatActivity(), UserListener {
 
     private lateinit var binding : ActivityUsersBinding
     private lateinit var preferenceManager: PreferenceManager
@@ -62,12 +65,13 @@ class UsersActivity : AppCompatActivity() {
                         user.email = queryDocumentSnapshot.getString(KEY_EMAIL)
                         user.image = queryDocumentSnapshot.getString(KEY_IMAGE)
                         user.token = queryDocumentSnapshot.getString(KEY_FCM_TOKEN)
+                        user.id = queryDocumentSnapshot.id
                         listUser.add(user)
                         Log.d(TAG, "getUsers: name : ${user.name}")
                     }
 
                     if (listUser.size>0){
-                        val userAdapter = UsersAdapter(listUser)
+                        val userAdapter = UsersAdapter(listUser,this)
                         Log.d(TAG, "getUsers: ${listUser[0].email}")
                         Log.d(TAG, "adapter icon con : ${userAdapter.itemCount}")
                         binding.rvUsers.visibility = View.VISIBLE
@@ -100,5 +104,12 @@ class UsersActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "UsersActivity"
+    }
+
+    override fun onUserClicked(user: User) {
+        val intent = Intent(applicationContext,ChatActivity::class.java)
+        intent.putExtra(KEY_USER,user)
+        startActivity(intent)
+        finish()
     }
 }

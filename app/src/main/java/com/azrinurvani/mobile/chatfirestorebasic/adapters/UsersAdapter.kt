@@ -8,9 +8,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.azrinurvani.mobile.chatfirestorebasic.databinding.ItemContainerUserBinding
+import com.azrinurvani.mobile.chatfirestorebasic.listeners.UserListener
 import com.azrinurvani.mobile.chatfirestorebasic.models.User
 
-class UsersAdapter(private val listUser : ArrayList<User>) : RecyclerView.Adapter<UsersAdapter.UserViewHolder>() {
+class UsersAdapter(private val listUser : ArrayList<User>,private val userListener: UserListener) : RecyclerView.Adapter<UsersAdapter.UserViewHolder>() {
+
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
         val binding = ItemContainerUserBinding.inflate(LayoutInflater.from(parent.context),parent,false)
@@ -35,6 +38,9 @@ class UsersAdapter(private val listUser : ArrayList<User>) : RecyclerView.Adapte
                 tvName.setText(data?.name)
                 imageProfile.setImageBitmap(getUserImage(data?.image.toString()))
                 Log.d(TAG, "setUserData: ${data?.name}")
+                this.root.setOnClickListener {
+                    data?.let { userData -> userListener.onUserClicked(userData) }
+                }
             }
         }
     }
