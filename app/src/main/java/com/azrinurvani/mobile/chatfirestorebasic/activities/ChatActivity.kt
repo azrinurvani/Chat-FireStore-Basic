@@ -3,7 +3,6 @@ package com.azrinurvani.mobile.chatfirestorebasic.activities
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
@@ -13,8 +12,10 @@ import com.azrinurvani.mobile.chatfirestorebasic.adapters.ChatAdapter
 import com.azrinurvani.mobile.chatfirestorebasic.databinding.ActivityChatBinding
 import com.azrinurvani.mobile.chatfirestorebasic.models.ChatMessage
 import com.azrinurvani.mobile.chatfirestorebasic.models.User
+import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_AVAILABILITY
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_COLLECTION_CHAT
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_COLLECTION_CONVERSATIONS
+import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_COLLECTION_USERS
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_IMAGE
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_LAST_MESSAGE
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_MESSAGE
@@ -40,7 +41,7 @@ import java.util.Date
 import java.util.Locale
 
 
-class ChatActivity : AppCompatActivity() {
+class ChatActivity : BaseActivity() {
 
     private lateinit var binding : ActivityChatBinding
     private var receiverUser : User? = null
@@ -50,6 +51,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var database: FirebaseFirestore
     private var chatAdapter: ChatAdapter? = null
     private var conversionId : String? = null
+    private var isReceiverAvailable : Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +67,6 @@ class ChatActivity : AppCompatActivity() {
         preferenceManager = PreferenceManager(this)
         //TODO - User Id adalah user yang login
         chatAdapter = preferenceManager.getString(KEY_USER_ID)?.let { userId ->
-            Log.d(TAG, "init: keyUserId : $userId")
 
             ChatAdapter(listChatMessage,getBitmapFromEncodedString(receiverUser?.image.toString()), userId)
         }
@@ -98,6 +99,27 @@ class ChatActivity : AppCompatActivity() {
         }
 
         binding.etInputMessage.setText(null)
+    }
+
+    private fun listenAvailabilityOfReceiver(){
+        database.collection(KEY_COLLECTION_USERS)
+            .document(receiverUser?.id.toString())
+            .addSnapshotListener(this, EventListener { value, error ->
+                if (error !=null) return@EventListener
+
+                if (value!=null){
+                    if (value.getLong(KEY_AVAILABILITY)!=null){
+                        val availability = value.getLong(KEY_AVAILABILITY)?.toInt()
+                        isReceiverAvailable = availability == 1
+                    }
+
+                }
+                if (isReceiverAvailable){
+                    binding.tvAvailability.visibility = View.VISIBLE
+                }else{
+                    binding.tvAvailability.visibility = View.GONE
+                }
+            })
     }
 
     private fun listenMessages(){
@@ -228,6 +250,13 @@ class ChatActivity : AppCompatActivity() {
             conversionId = documentSnapshot.id
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        listenAvailabilityOfReceiver()
+    }
+
+
 
     companion object {
         private const val TAG = "ChatActivity"

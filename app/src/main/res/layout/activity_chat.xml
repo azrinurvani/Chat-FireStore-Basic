@@ -75,6 +75,19 @@
         android:layout_marginTop="@dimen/_12sdp"
         app:layout_constraintTop_toBottomOf="@id/image_back"/>
 
+    <TextView
+        android:id="@+id/tv_availability"
+        android:textSize="@dimen/_10ssp"
+        android:padding="@dimen/_2sdp"
+        android:textColor="@color/white"
+        android:visibility="visible"
+        android:gravity="center"
+        android:text="@string/online"
+        app:layout_constraintTop_toBottomOf="@id/view_supporter"
+        android:background="@color/online_background"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_chat"
         android:orientation="vertical"
@@ -83,7 +96,7 @@
         android:clipToPadding="false"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         android:overScrollMode="never"
-        app:layout_constraintTop_toBottomOf="@id/view_supporter"
+        app:layout_constraintTop_toBottomOf="@id/tv_availability"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:visibility="gone"

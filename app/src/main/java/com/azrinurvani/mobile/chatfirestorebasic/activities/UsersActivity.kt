@@ -24,7 +24,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.math.log
 
 
-class UsersActivity : AppCompatActivity(), UserListener {
+class UsersActivity : BaseActivity(), UserListener {
 
     private lateinit var binding : ActivityUsersBinding
     private lateinit var preferenceManager: PreferenceManager
