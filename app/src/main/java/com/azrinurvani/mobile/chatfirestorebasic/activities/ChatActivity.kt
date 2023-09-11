@@ -14,20 +14,28 @@ import com.azrinurvani.mobile.chatfirestorebasic.databinding.ActivityChatBinding
 import com.azrinurvani.mobile.chatfirestorebasic.models.ChatMessage
 import com.azrinurvani.mobile.chatfirestorebasic.models.User
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_COLLECTION_CHAT
+import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_COLLECTION_CONVERSATIONS
+import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_IMAGE
+import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_LAST_MESSAGE
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_MESSAGE
+import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_NAME
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_RECEIVER_ID
+import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_RECEIVER_IMAGE
+import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_RECEIVER_NAME
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_SENDER_ID
+import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_SENDER_IMAGE
+import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_SENDER_NAME
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_TIMESTAMP
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_USER
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.KEY_USER_ID
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.PreferenceManager
 import com.azrinurvani.mobile.chatfirestorebasic.utilities.getSerializable
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import java.text.SimpleDateFormat
-import java.util.Collections
 import java.util.Date
 import java.util.Locale
 
@@ -41,6 +49,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var preferenceManager: PreferenceManager
     private lateinit var database: FirebaseFirestore
     private var chatAdapter: ChatAdapter? = null
+    private var conversionId : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,6 +81,22 @@ class ChatActivity : AppCompatActivity() {
         messsage[KEY_TIMESTAMP] = Date()
 
         database.collection(KEY_COLLECTION_CHAT).add(messsage)
+
+        if (conversionId != null){
+            updateConversion(binding.etInputMessage.text.toString())
+        }else{
+            val conversionMap = HashMap<String,Any>()
+            preferenceManager.getString(KEY_USER_ID)?.let { conversionMap.put(KEY_SENDER_ID, it) }
+            preferenceManager.getString(KEY_SENDER_NAME)?.let { conversionMap.put(KEY_NAME, it) }
+            preferenceManager.getString(KEY_SENDER_IMAGE)?.let { conversionMap.put(KEY_IMAGE, it) }
+            receiverUser?.id?.let { conversionMap.put(KEY_RECEIVER_ID, it) }
+            receiverUser?.name?.let { conversionMap.put(KEY_RECEIVER_NAME, it) }
+            receiverUser?.image?.let { conversionMap.put(KEY_RECEIVER_IMAGE, it) }
+            conversionMap.put(KEY_LAST_MESSAGE,binding.etInputMessage.text.toString())
+            conversionMap.put(KEY_TIMESTAMP,Date())
+            addConversion(conversionMap)
+        }
+
         binding.etInputMessage.setText(null)
     }
 
@@ -124,6 +149,11 @@ class ChatActivity : AppCompatActivity() {
         }
         binding.progressBar.visibility = View.GONE
 
+        //TODO - Check Conversion
+        if (conversionId == null){
+            checkForConversion()
+        }
+
     }
 
     private fun getBitmapFromEncodedString(encodedImage:String?) : Bitmap?{
@@ -149,8 +179,54 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    private fun addConversion(conversion : HashMap<String,Any>){
+        database.collection(KEY_COLLECTION_CONVERSATIONS)
+            .add(conversion)
+            .addOnSuccessListener { documentReference->
+                conversionId = documentReference.id
+            }
+    }
+
+    private fun updateConversion(message : String){
+        val documentReference = database.collection(KEY_COLLECTION_CONVERSATIONS)
+            .document(conversionId.toString())
+
+        documentReference.update(
+            KEY_LAST_MESSAGE, message,
+            KEY_TIMESTAMP, Date()
+        )
+    }
+
     private fun getReadableDateTime(date:Date) : String{
         return SimpleDateFormat("MMMM dd, yyyy - hh:mm a",Locale.getDefault()).format(date)
+    }
+
+    private fun checkForConversion(){
+        if (listChatMessage.size != 0 ){
+            preferenceManager.getString(KEY_USER_ID)
+                ?.let { checkForConversionRemotely(it, receiverUser?.id.toString()) }
+
+            preferenceManager.getString(KEY_USER_ID)
+                ?.let { checkForConversionRemotely(receiverUser?.id.toString(),it ) }
+        }
+    }
+
+    private fun checkForConversionRemotely(senderId:String,receiverId:String){
+        database.collection(KEY_COLLECTION_CONVERSATIONS)
+            .whereEqualTo(KEY_SENDER_ID,senderId)
+            .whereEqualTo(KEY_RECEIVER_ID,receiverId)
+            .get()
+            .addOnCompleteListener(conversionOnCompleteListener)
+
+    }
+
+    private val conversionOnCompleteListener : OnCompleteListener<QuerySnapshot> = OnCompleteListener { task->
+        if (task.isSuccessful &&
+            task.result != null &&
+            task.result.documents.size > 0){
+            val documentSnapshot = task.result.documents[0]
+            conversionId = documentSnapshot.id
+        }
     }
 
     companion object {
